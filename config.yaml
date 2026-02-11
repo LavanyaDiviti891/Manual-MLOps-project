@@ -1,0 +1,23 @@
+project_name: "Predictive_Maintenance_v1"
+author: "Lavanya_diviti"
+
+data:
+  raw_path: "data/raw/v1_raw.csv"
+  processed_dir: "data/processed"
+  current_version: "v1"
+
+model_params:
+  algorithm: "RandomForest"
+  n_estimators: 100
+  max_depth: 10
+  random_state: 42
+
+  # Training Settings
+training:
+  target_column: "Machine failure"
+  train_size: 7000
+  metric: "accuracy"
+
+deployment:
+  model_path: "models/model_v1.pkl"
+  threshold: 0.75

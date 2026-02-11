@@ -1,0 +1,7 @@
+
+Version: v1_cleaned.csv
+Created_on: 2026-02-10 09:58:41.031712
+Script: src/data_prep.py
+Input: data/raw/v1_raw.csv
+Description: Dropped missing values
+------------------------------------------------------------

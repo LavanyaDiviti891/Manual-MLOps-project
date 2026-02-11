@@ -1,0 +1,39 @@
+import pandas as pd
+import yaml
+from datetime import datetime
+import os
+
+# Load config
+with open("config.yaml", "r") as f:
+    config = yaml.safe_load(f)
+
+RAW_PATH = config["data"]["raw_path"]
+PROCESSED_DIR = config["data"]["processed_dir"]
+VERSION = config["data"]["current_version"]
+
+# Ensure processed directory exists
+os.makedirs(PROCESSED_DIR, exist_ok=True)
+
+# Load raw data
+df = pd.read_csv(RAW_PATH)
+
+# Basic cleaning (example – keep it simple)
+df_cleaned = df.dropna()
+
+# Save cleaned data
+cleaned_file = f"{VERSION}_cleaned.csv"
+cleaned_path = os.path.join(PROCESSED_DIR, cleaned_file)
+df_cleaned.to_csv(cleaned_path, index=False)
+
+# Log to manifest
+with open("data/manifest.txt", "a") as f:
+    f.write(
+        f"\nVersion: {cleaned_file}\n"
+        f"Created_on: {datetime.now()}\n"
+        f"Script: src/data_prep.py\n"
+        f"Input: {RAW_PATH}\n"
+        f"Description: Dropped missing values\n"
+        f"{'-'*60}\n"
+    )
+
+print("Phase A data preparation completed successfully.")

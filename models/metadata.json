@@ -1,0 +1,23 @@
+{
+    "training_date": "2026-02-10T18:48:16.297052",
+    "dataset_version": "v1_raw.csv",
+    "model_type": "RandomForestClassifier",
+    "accuracy": 0.999,
+    "n_features": 13,
+    "feature_names": [
+        "Air temperature [K]",
+        "Process temperature [K]",
+        "Rotational speed [rpm]",
+        "Torque [Nm]",
+        "Tool wear [min]",
+        "TWF",
+        "HDF",
+        "PWF",
+        "OSF",
+        "RNF",
+        "Type_H",
+        "Type_L",
+        "Type_M"
+    ],
+    "git_commit": "not_a_git_repo"
+}

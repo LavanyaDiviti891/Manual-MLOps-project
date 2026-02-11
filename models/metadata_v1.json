@@ -1,0 +1,15 @@
+{
+    "model_version": "v1",
+    "training_date": "2026-02-10T15:02:58.040888",
+    "dataset_used": "data/processed\\v1_cleaned.csv",
+    "algorithm": "RandomForest",
+    "hyperparameters": {
+        "algorithm": "RandomForest",
+        "n_estimators": 100,
+        "max_depth": 10,
+        "random_state": 42
+    },
+    "metric": "accuracy",
+    "accuracy": 0.9796666666666667,
+    "git_commit": "git_not_available"
+}
