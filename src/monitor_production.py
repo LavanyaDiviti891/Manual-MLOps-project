@@ -44,3 +44,27 @@ else:
     accuracy = sum([t == p for t, p in zip(y_true, y_pred)]) / len(y_true)
     print(f"Production accuracy: {accuracy:.4f}")
     print(f"Skipped entries due to errors: {skipped}")
+
+# -----------------------------
+# Compute production accuracy
+# -----------------------------
+if len(valid_preds) == 0:
+    print("No valid predictions found. Check API and Day-2 data!")
+else:
+    y_true = [r.get("actual") for r in valid_preds]
+    y_pred = [r.get("prediction") for r in valid_preds]
+
+    accuracy = sum([t == p for t, p in zip(y_true, y_pred)]) / len(y_true)
+
+    print(f"Production accuracy: {accuracy:.4f}")
+    print(f"Skipped entries due to errors: {skipped}")
+
+    # -----------------------------
+    # Drift Detection Logic
+    # -----------------------------
+    DRIFT_THRESHOLD = 0.85  # you can define in config.json ideally
+
+    if accuracy < DRIFT_THRESHOLD:
+        print(" Drift detected! Retraining required.")
+    else:
+        print("Model performance stable. No retraining needed.")
