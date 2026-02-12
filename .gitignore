@@ -1,0 +1,16 @@
+# Logs
+logs/
+*.log
+monitoring_log.csv
+deployment.log
+
+# Models
+models/
+*.pkl
+
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
