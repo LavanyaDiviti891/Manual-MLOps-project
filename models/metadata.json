@@ -1,6 +1,6 @@
 {
     "project_name": "Predictive_Maintenance_v1",
-    "training_date": "2026-02-12T09:34:16.954961",
+    "training_date": "2026-02-12T11:18:01.892073",
     "dataset_version": "v1_raw.csv",
     "model_type": "RandomForest",
     "accuracy": 0.999,
@@ -8,5 +8,5 @@
     "max_depth": null,
     "random_state": 42,
     "n_features": 13,
-    "git_commit": "fafae6ee931fd9621f96980c54d56b31b1947707"
+    "git_commit": "47cd361c8bd026a9b8e02043d68a5c85e2f2076e"
 }

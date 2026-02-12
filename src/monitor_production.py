@@ -1,7 +1,10 @@
 import json
 import joblib
 import yaml
+import os
 from pathlib import Path
+from datetime import datetime
+import csv
 
 # --------------------------------------------------
 # Load config
@@ -18,18 +21,10 @@ with open(CONFIG_PATH, "r") as f:
 # Paths from config
 # --------------------------------------------------
 MODEL_PATH = Path(config["deployment"]["model_path"])
-MODEL_DIR = MODEL_PATH.parent
+THRESHOLD = config["deployment"]["threshold"]
+
 LOG_PATH = Path("logs/production_predictions.jsonl")
-
-FEATURE_NAMES_PATH = MODEL_DIR / "feature_names.pkl"
-
-# --------------------------------------------------
-# Load feature names
-# --------------------------------------------------
-if not FEATURE_NAMES_PATH.exists():
-    raise FileNotFoundError("feature_names.pkl not found.")
-
-feature_names = joblib.load(FEATURE_NAMES_PATH)
+MONITOR_LOG = Path("logs/monitoring_log.csv")
 
 # --------------------------------------------------
 # Read production log
@@ -43,7 +38,7 @@ if not LOG_PATH.exists():
 with open(LOG_PATH, "r") as f:
     for line in f:
         entry = json.loads(line)
-        if "prediction" in entry:
+        if "prediction" in entry and "actual" in entry:
             valid_preds.append(entry)
         else:
             skipped += 1
@@ -60,4 +55,35 @@ else:
     accuracy = sum(t == p for t, p in zip(y_true, y_pred)) / len(y_true)
 
     print(f"Production accuracy: {accuracy:.4f}")
-    print(f"Skipped entries due to errors: {skipped}")
+    print(f"Threshold from config: {THRESHOLD}")
+    print(f"Skipped entries: {skipped}")
+
+    # --------------------------------------------------
+    # Log monitoring results
+    # --------------------------------------------------
+    MONITOR_LOG.parent.mkdir(exist_ok=True)
+
+    file_exists = MONITOR_LOG.exists()
+
+    with open(MONITOR_LOG, "a", newline="") as csvfile:
+        writer = csv.writer(csvfile)
+
+        if not file_exists:
+            writer.writerow(["timestamp", "accuracy", "threshold", "retrain_triggered"])
+
+        retrain_flag = accuracy < THRESHOLD
+        writer.writerow([
+            datetime.now(),
+            round(accuracy, 4),
+            THRESHOLD,
+            retrain_flag
+        ])
+
+    # --------------------------------------------------
+    # Retrain Trigger Logic
+    # --------------------------------------------------
+    if accuracy < THRESHOLD:
+        print("Performance below threshold. Retraining triggered.")
+        os.system("python src/train.py")
+    else:
+        print("Model performance is acceptable. No retraining needed.")
