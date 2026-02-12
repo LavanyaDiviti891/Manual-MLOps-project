@@ -1,8 +1,7 @@
 # Logs
 logs/
 *.log
-monitoring_log.csv
-deployment.log
+*.jsonl
 
 # Models
 models/
