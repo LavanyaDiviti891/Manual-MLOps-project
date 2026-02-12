@@ -5,63 +5,80 @@ from pathlib import Path
 import requests
 
 # -----------------------------
-# Paths
+# Configuration
 # -----------------------------
 DATA_PATH = r"D:\manual_mlops_project\data\production\day2_data.csv"
 MODEL_DIR = Path("models")
-MODEL_PATH = MODEL_DIR / "model.pkl"
-ENCODER_PATH = MODEL_DIR / "encoder.pkl"
 FEATURES_PATH = MODEL_DIR / "feature_names.pkl"
 
 LOGS_DIR = Path("logs")
 LOGS_DIR.mkdir(exist_ok=True)
 OUTPUT_LOG = LOGS_DIR / "production_predictions.jsonl"
 
-API_URL = "http://127.0.0.1:8000/predict"  # Make sure your API is running
+API_URL = "http://127.0.0.1:8000/predict"
+TARGET_COL = "Machine failure"
 
 # -----------------------------
-# Load Day-2 data
+# Load Data
 # -----------------------------
 df = pd.read_csv(DATA_PATH)
+df.columns = [col.strip() for col in df.columns]
+
+if TARGET_COL not in df.columns:
+    raise ValueError(f"Target column '{TARGET_COL}' not found in dataset.")
 
 # -----------------------------
-# Load model artifacts
+# Load Feature Names
 # -----------------------------
 feature_names = joblib.load(FEATURES_PATH)
-encoder = joblib.load(ENCODER_PATH)
 
 # -----------------------------
-# Clean column names
-# -----------------------------
-df.columns = [c.strip() for c in df.columns]
-
-# -----------------------------
-# Prepare input
+# Run Inference
 # -----------------------------
 results = []
+success_count = 0
+error_count = 0
 
-for idx, row in df.iterrows():
-    payload = row.to_dict()
+for _, row in df.iterrows():
+    actual_label = row[TARGET_COL]
 
-    # Remove unexpected columns
-    input_data = {k: v for k, v in payload.items() if k in feature_names or k == "Type"}
+    # Prepare input data
+    input_data = {}
 
-    # Make API request
+    for col in feature_names:
+        if col in row:
+            input_data[col] = row[col]
+
+    # Ensure 'Type' column is included (required by API)
+    if "Type" in df.columns:
+        input_data["Type"] = row["Type"]
+
     try:
-        response = requests.post(API_URL, json={"data": input_data}).json()
-        prediction = response.get("prediction", None)
-        if prediction is None:
-            results.append({"payload": payload, "error": response})
+        response = requests.post(API_URL, json={"data": input_data})
+        response_json = response.json()
+
+        prediction = response_json.get("prediction")
+
+        if prediction is not None:
+            results.append({
+                "prediction": int(prediction),
+                "actual": int(actual_label)
+            })
+            success_count += 1
         else:
-            results.append({"payload": payload, "prediction": prediction, "actual": payload.get("Machine failure")})
-    except Exception as e:
-        results.append({"payload": payload, "error": str(e)})
+            error_count += 1
+
+    except Exception:
+        error_count += 1
 
 # -----------------------------
-# Save logs
+# Save Logs
 # -----------------------------
 with open(OUTPUT_LOG, "w") as f:
-    for r in results:
-        f.write(json.dumps(r) + "\n")
+    for entry in results:
+        f.write(json.dumps(entry) + "\n")
 
-print(f"Day-2 inference complete. Logs written to: {OUTPUT_LOG}")
+print(f"Day-2 inference complete.")
+print(f"Valid predictions logged: {success_count}")
+print(f"Errors encountered: {error_count}")
+print(f"Logs written to: {OUTPUT_LOG}")

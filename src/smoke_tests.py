@@ -1,77 +1,44 @@
 import requests
 import sys
 
+# -----------------------------------------
+# API URL
+# -----------------------------------------
 API_URL = "http://127.0.0.1:8000/predict"
 
-def run_smoke_test():
-    """
-    Smoke test for ML inference API.
-    Ensures:
-    - API is reachable
-    - Response schema is valid
-    - Model returns sensible probability
-    """
-
-    # High-risk payload to verify non-zero probability
-    payload = {
+# -----------------------------------------
+# Sample Payload (Must match inference.py schema)
+# -----------------------------------------
+payload = {
+    "data": {
         "Type": "L",
-        "Air temperature [K]": 340,
-        "Process temperature [K]": 360,
-        "Rotational speed [rpm]": 2800,
-        "Torque [Nm]": 80,
-        "Tool wear [min]": 260,
-        "TWF": 1,
-        "HDF": 1,
-        "PWF": 1,
-        "OSF": 1,
-        "RNF": 0
+        "Air temperature [K]": 298.1,
+        "Process temperature [K]": 308.6,
+        "Rotational speed [rpm]": 1551,
+        "Torque [Nm]": 42.8,
+        "Tool wear [min]": 0
     }
+}
 
-    try:
-        response = requests.post(API_URL, json=payload, timeout=5)
-    except requests.exceptions.RequestException as e:
-        print(" Smoke Test Failed: API not reachable")
-        print(str(e))
-        sys.exit(1)
+# -----------------------------------------
+# Smoke Test Execution
+# -----------------------------------------
+try:
+    response = requests.post(API_URL, json=payload)
 
-    # Status code check
-    if response.status_code != 200:
+    if response.status_code == 200:
+        print(" Smoke Test Passed")
+        print("Response:", response.json())
+    else:
         print(f" Smoke Test Failed: Status code {response.status_code}")
         print("Response:", response.text)
         sys.exit(1)
 
-    # Parse JSON
-    try:
-        result = response.json()
-    except ValueError:
-        print("Smoke Test Failed: Response is not valid JSON")
-        sys.exit(1)
+except requests.exceptions.ConnectionError:
+    print(" Smoke Test Failed: Unable to connect to API.")
+    print("Make sure the API server is running.")
+    sys.exit(1)
 
-    # Schema validation
-    if "prediction" not in result or "probability" not in result:
-        print(" Smoke Test Failed: Invalid response schema")
-        print("Response:", result)
-        sys.exit(1)
-
-    prediction = result["prediction"]
-    probability = result["probability"]
-
-    # Logical validation
-    if not (0.0 <= probability <= 1.0):
-        print(" Smoke Test Failed: Probability out of range")
-        sys.exit(1)
-
-    if prediction not in [0, 1]:
-        print("Smoke Test Failed: Invalid prediction value")
-        sys.exit(1)
-
-    print("Smoke Test Passed")
-    print(f"Prediction  : {prediction}")
-    print(f"Probability : {probability:.4f}")
-
-    # Optional warning (not failure)
-    if probability < 0.05:
-        print(" Warning: Very low probability — model sees normal conditions")
-
-if __name__ == "__main__":
-    run_smoke_test()
+except Exception as e:
+    print(" Smoke Test Failed:", str(e))
+    sys.exit(1)

@@ -10,7 +10,7 @@ author: "Lavanya_Diviti"
 data:
   raw_path: "data/raw/v1_raw.csv"
   processed_dir: "data/processed/"
-  current_version: "v1_raw.csv"
+  current_version: "v1.csv"
 
 # ----------------------------------
 # Hyperparameters

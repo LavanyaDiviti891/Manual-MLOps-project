@@ -5,3 +5,45 @@ Script: src/data_prep.py
 Input: data/raw/v1_raw.csv
 Description: Dropped missing values
 ------------------------------------------------------------
+
+Version: v1_raw.csv_cleaned.csv
+Created_on: 2026-02-12 18:11:12.499837
+Script: src/data_prep.py
+Input: data/raw/v1_raw.csv
+Description: Dropped missing values
+------------------------------------------------------------
+
+Version: v1_raw.csv_cleaned.csv
+Created_on: 2026-02-12 18:34:41.085965
+Script: src/data_prep.py
+Input: data/raw/v1_raw.csv
+Description: Dropped missing values
+------------------------------------------------------------
+
+Version: v1.csv_cleaned.csv
+Created_on: 2026-02-12 18:39:41.761884
+Script: src/data_prep.py
+Input: data/raw/v1_raw.csv
+Description: Dropped missing values
+------------------------------------------------------------
+
+Version: v2_cleaned.csv
+Created_on: 2026-02-12 18:43:45.109189
+Script: src/data_prep.py
+Input: data/raw/v1_raw.csv
+Description: Dropped missing values
+------------------------------------------------------------
+
+Version: v3_cleaned.csv
+Created_on: 2026-02-12 18:45:10.959365
+Script: src/data_prep.py
+Input: data/raw/v1_raw.csv
+Description: Dropped missing values
+------------------------------------------------------------
+
+Version: v4_cleaned.csv
+Created_on: 2026-02-12 19:03:45.408673
+Script: src/data_prep.py
+Input: data/raw/v1_raw.csv
+Description: Dropped missing values
+------------------------------------------------------------
