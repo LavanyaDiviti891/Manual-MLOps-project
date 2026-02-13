@@ -92,7 +92,7 @@ Manual-MLOps-project/
 
 #### CLONE REPOSITORY
 
-
+Create a new enviroment and sctivate it before Git cloning for avoiding errors.
 
 git clone https://github.com/LavanyaDiviti891/Manual-MLOps-project.git
 
