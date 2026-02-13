@@ -82,7 +82,6 @@ Manual-MLOps-project/
 
 │
 
-├── tests/
 
 │
 
@@ -96,7 +95,7 @@ Create a new enviroment and sctivate it before Git cloning for avoiding errors.
 
 git clone https://github.com/LavanyaDiviti891/Manual-MLOps-project.git
 
-cd Manual-MLOps-project
+cd manual-mlops-project
 
 
 
