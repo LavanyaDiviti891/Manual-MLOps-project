@@ -5,10 +5,6 @@ import os
 from pathlib import Path
 from datetime import datetime
 import csv
-
-# --------------------------------------------------
-# Load config
-# --------------------------------------------------
 CONFIG_PATH = "config.yaml"
 
 if not Path(CONFIG_PATH).exists():
@@ -17,18 +13,14 @@ if not Path(CONFIG_PATH).exists():
 with open(CONFIG_PATH, "r") as f:
     config = yaml.safe_load(f)
 
-# --------------------------------------------------
-# Paths from config
-# --------------------------------------------------
+
+
 MODEL_PATH = Path(config["deployment"]["model_path"])
 THRESHOLD = config["deployment"]["threshold"]
 
 LOG_PATH = Path("logs/production_predictions.jsonl")
 MONITOR_LOG = Path("logs/monitoring_log.csv")
 
-# --------------------------------------------------
-# Read production log
-# --------------------------------------------------
 valid_preds = []
 skipped = 0
 
@@ -43,9 +35,7 @@ with open(LOG_PATH, "r") as f:
         else:
             skipped += 1
 
-# --------------------------------------------------
-# Calculate accuracy
-# --------------------------------------------------
+
 if len(valid_preds) == 0:
     print("No valid predictions found.")
 else:
@@ -58,9 +48,6 @@ else:
     print(f"Threshold from config: {THRESHOLD}")
     print(f"Skipped entries: {skipped}")
 
-    # --------------------------------------------------
-    # Log monitoring results
-    # --------------------------------------------------
     MONITOR_LOG.parent.mkdir(exist_ok=True)
 
     file_exists = MONITOR_LOG.exists()
@@ -79,9 +66,8 @@ else:
             retrain_flag
         ])
 
-    # --------------------------------------------------
-    # Retrain Trigger Logic
-    # --------------------------------------------------
+
+    
     if accuracy < THRESHOLD:
         print("Performance below threshold. Retraining triggered.")
         os.system("python src/train.py")

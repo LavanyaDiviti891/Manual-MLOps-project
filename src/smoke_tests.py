@@ -1,14 +1,8 @@
 import requests
 import sys
-
-# -----------------------------------------
-# API URL
-# -----------------------------------------
+--------------
 API_URL = "http://127.0.0.1:8000/predict"
 
-# -----------------------------------------
-# Sample Payload (Must match inference.py schema)
-# -----------------------------------------
 payload = {
     "data": {
         "Type": "L",
@@ -20,9 +14,7 @@ payload = {
     }
 }
 
-# -----------------------------------------
-# Smoke Test Execution
-# -----------------------------------------
+
 try:
     response = requests.post(API_URL, json=payload)
 

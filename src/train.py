@@ -11,9 +11,6 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.metrics import accuracy_score
 
 
-# --------------------------------------------------
-# Load Configuration
-# --------------------------------------------------
 CONFIG_PATH = "config.yaml"
 
 if not Path(CONFIG_PATH).exists():
@@ -22,9 +19,6 @@ if not Path(CONFIG_PATH).exists():
 with open(CONFIG_PATH, "r") as f:
     config = yaml.safe_load(f)
 
-# --------------------------------------------------
-# Read Config Values
-# --------------------------------------------------
 DATA_PATH = config["data"]["raw_path"]
 CURRENT_VERSION = config["data"]["current_version"]
 
@@ -36,16 +30,12 @@ N_ESTIMATORS = config["model_params"]["n_estimators"]
 MAX_DEPTH = config["model_params"]["max_depth"]
 RANDOM_STATE = config["model_params"]["random_state"]
 
-# --------------------------------------------------
-# Columns Configuration
-# --------------------------------------------------
+
 TARGET_COL = "Machine failure"
 ID_COLS = ["UDI", "Product ID"]
 CATEGORICAL_COLS = ["Type"]
 
-# --------------------------------------------------
-# Load Dataset
-# --------------------------------------------------
+
 if not Path(DATA_PATH).exists():
     raise FileNotFoundError(f"Dataset not found at {DATA_PATH}")
 
@@ -57,13 +47,11 @@ print("Columns:", df.columns.tolist())
 if TARGET_COL not in df.columns:
     raise ValueError(f"Target column '{TARGET_COL}' not found in dataset")
 
-# --------------------------------------------------
-# Prepare Features & Target
-# --------------------------------------------------
+
 y = df[TARGET_COL]
 X_raw = df.drop(columns=[TARGET_COL] + ID_COLS)
 
-# Encode categorical features
+
 encoder = OneHotEncoder(sparse_output=False, handle_unknown="ignore")
 encoded_cat = encoder.fit_transform(X_raw[CATEGORICAL_COLS])
 
@@ -80,9 +68,7 @@ feature_names = list(X.columns)
 print("Final training features:")
 print(feature_names)
 
-# --------------------------------------------------
-# Train / Test Split
-# --------------------------------------------------
+
 X_train, X_test, y_train, y_test = train_test_split(
     X,
     y,
@@ -91,9 +77,6 @@ X_train, X_test, y_train, y_test = train_test_split(
     stratify=y
 )
 
-# --------------------------------------------------
-# Train Model (From Config)
-# --------------------------------------------------
 model = RandomForestClassifier(
     n_estimators=N_ESTIMATORS,
     max_depth=MAX_DEPTH,
@@ -103,24 +86,17 @@ model = RandomForestClassifier(
 
 model.fit(X_train, y_train)
 
-# --------------------------------------------------
-# Evaluate
-# --------------------------------------------------
+
 y_pred = model.predict(X_test)
 accuracy = accuracy_score(y_test, y_pred)
 
 print(f"Model accuracy: {accuracy:.4f}")
 
-# --------------------------------------------------
-# Save Artifacts
-# --------------------------------------------------
 joblib.dump(model, MODEL_PATH)
 joblib.dump(encoder, MODEL_DIR / "encoder.pkl")
 joblib.dump(feature_names, MODEL_DIR / "feature_names.pkl")
 
-# --------------------------------------------------
-# Get Git Commit Hash
-# --------------------------------------------------
+
 try:
     git_hash = subprocess.check_output(
         ["git", "rev-parse", "HEAD"],
@@ -129,9 +105,7 @@ try:
 except Exception:
     git_hash = "git_commit_not_available"
 
-# --------------------------------------------------
-# Save Metadata
-# --------------------------------------------------
+
 metadata = {
     "project_name": config["project_name"],
     "training_date": datetime.now().isoformat(),

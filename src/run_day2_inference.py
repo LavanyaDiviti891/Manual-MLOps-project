@@ -18,23 +18,16 @@ OUTPUT_LOG = LOGS_DIR / "production_predictions.jsonl"
 API_URL = "http://127.0.0.1:8000/predict"
 TARGET_COL = "Machine failure"
 
-# -----------------------------
-# Load Data
-# -----------------------------
+
 df = pd.read_csv(DATA_PATH)
 df.columns = [col.strip() for col in df.columns]
 
 if TARGET_COL not in df.columns:
     raise ValueError(f"Target column '{TARGET_COL}' not found in dataset.")
 
-# -----------------------------
-# Load Feature Names
-# -----------------------------
 feature_names = joblib.load(FEATURES_PATH)
 
-# -----------------------------
-# Run Inference
-# -----------------------------
+
 results = []
 success_count = 0
 error_count = 0
@@ -49,7 +42,7 @@ for _, row in df.iterrows():
         if col in row:
             input_data[col] = row[col]
 
-    # Ensure 'Type' column is included (required by API)
+   
     if "Type" in df.columns:
         input_data["Type"] = row["Type"]
 
@@ -71,9 +64,7 @@ for _, row in df.iterrows():
     except Exception:
         error_count += 1
 
-# -----------------------------
-# Save Logs
-# -----------------------------
+
 with open(OUTPUT_LOG, "w") as f:
     for entry in results:
         f.write(json.dumps(entry) + "\n")
