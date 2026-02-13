@@ -3,3 +3,4 @@ numpy
 scikit-learn
 pyyaml
 joblib
+uvicorn==0.27.1

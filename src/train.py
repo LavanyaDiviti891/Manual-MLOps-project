@@ -5,22 +5,26 @@ import yaml
 import subprocess
 from pathlib import Path
 from datetime import datetime
-from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.metrics import accuracy_score
 
 
+# -----------------------------
+# Load Config
+# -----------------------------
 CONFIG_PATH = "config.yaml"
 
 if not Path(CONFIG_PATH).exists():
-    raise FileNotFoundError("config.yaml not found. Training cannot proceed.")
+    raise FileNotFoundError("config.yaml not found.")
 
 with open(CONFIG_PATH, "r") as f:
     config = yaml.safe_load(f)
 
 DATA_PATH = config["data"]["raw_path"]
 CURRENT_VERSION = config["data"]["current_version"]
+
+TRAIN_SIZE = 7000  # Requirement: first 7000 for training
 
 MODEL_PATH = Path(config["deployment"]["model_path"])
 MODEL_DIR = MODEL_PATH.parent
@@ -30,73 +34,84 @@ N_ESTIMATORS = config["model_params"]["n_estimators"]
 MAX_DEPTH = config["model_params"]["max_depth"]
 RANDOM_STATE = config["model_params"]["random_state"]
 
-
 TARGET_COL = "Machine failure"
 ID_COLS = ["UDI", "Product ID"]
 CATEGORICAL_COLS = ["Type"]
 
 
+# -----------------------------
+# Load Dataset
+# -----------------------------
 if not Path(DATA_PATH).exists():
     raise FileNotFoundError(f"Dataset not found at {DATA_PATH}")
 
 df = pd.read_csv(DATA_PATH)
 
-print("Loaded dataset from:", DATA_PATH)
-print("Columns:", df.columns.tolist())
-
 if TARGET_COL not in df.columns:
-    raise ValueError(f"Target column '{TARGET_COL}' not found in dataset")
+    raise ValueError(f"Target column '{TARGET_COL}' not found.")
+
+print("Dataset loaded.")
+print(f"Total samples: {len(df)}")
 
 
-y = df[TARGET_COL]
-X_raw = df.drop(columns=[TARGET_COL] + ID_COLS)
+# -----------------------------
+# Chronological Split
+# -----------------------------
+train_df = df.iloc[:TRAIN_SIZE]
+production_df = df.iloc[TRAIN_SIZE:]
 
+print(f"Training samples: {len(train_df)}")
+print(f"Production samples (simulated): {len(production_df)}")
+
+
+# -----------------------------
+# Feature Engineering
+# -----------------------------
+y_train = train_df[TARGET_COL]
+X_raw_train = train_df.drop(columns=[TARGET_COL] + ID_COLS)
 
 encoder = OneHotEncoder(sparse_output=False, handle_unknown="ignore")
-encoded_cat = encoder.fit_transform(X_raw[CATEGORICAL_COLS])
+encoded_cat = encoder.fit_transform(X_raw_train[CATEGORICAL_COLS])
 
 encoded_cat_df = pd.DataFrame(
     encoded_cat,
     columns=encoder.get_feature_names_out(CATEGORICAL_COLS)
 )
 
-X_numeric = X_raw.drop(columns=CATEGORICAL_COLS).reset_index(drop=True)
-X = pd.concat([X_numeric, encoded_cat_df], axis=1)
+X_numeric = X_raw_train.drop(columns=CATEGORICAL_COLS).reset_index(drop=True)
+X_train = pd.concat([X_numeric, encoded_cat_df], axis=1)
 
-feature_names = list(X.columns)
+feature_names = list(X_train.columns)
 
-print("Final training features:")
-print(feature_names)
+print("Training features prepared.")
 
 
-X_train, X_test, y_train, y_test = train_test_split(
-    X,
-    y,
-    test_size=0.2,
-    random_state=RANDOM_STATE,
-    stratify=y
-)
-
+# -----------------------------
+# Train Model
+# -----------------------------
 model = RandomForestClassifier(
     n_estimators=N_ESTIMATORS,
     max_depth=MAX_DEPTH,
     random_state=RANDOM_STATE,
-    n_jobs=-1
+    n_jobs=1
 )
 
 model.fit(X_train, y_train)
 
+print("Model training completed.")
 
-y_pred = model.predict(X_test)
-accuracy = accuracy_score(y_test, y_pred)
 
-print(f"Model accuracy: {accuracy:.4f}")
-
+# -----------------------------
+# Save Artifacts
+# -----------------------------
 joblib.dump(model, MODEL_PATH)
 joblib.dump(encoder, MODEL_DIR / "encoder.pkl")
 joblib.dump(feature_names, MODEL_DIR / "feature_names.pkl")
 
 
+# -----------------------------
+# Save Metadata
+# -----------------------------
 try:
     git_hash = subprocess.check_output(
         ["git", "rev-parse", "HEAD"],
@@ -105,13 +120,13 @@ try:
 except Exception:
     git_hash = "git_commit_not_available"
 
-
 metadata = {
     "project_name": config["project_name"],
     "training_date": datetime.now().isoformat(),
     "dataset_version": CURRENT_VERSION,
     "model_type": config["model_params"]["algorithm"],
-    "accuracy": accuracy,
+    "train_samples": len(train_df),
+    "production_samples": len(production_df),
     "n_estimators": N_ESTIMATORS,
     "max_depth": MAX_DEPTH,
     "random_state": RANDOM_STATE,
@@ -124,4 +139,3 @@ with open(MODEL_DIR / "metadata.json", "w") as f:
 
 print("\nTraining completed successfully.")
 print("Model saved at:", MODEL_PATH)
-print("Metadata saved.")

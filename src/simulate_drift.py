@@ -1,22 +1,41 @@
 import pandas as pd
-import numpy as np
 import os
 
+# -----------------------------
+# Paths
+# -----------------------------
 INPUT_CSV = r"D:\manual_mlops_project\data\raw\v1_raw.csv"
 OUTPUT_DIR = r"D:\manual_mlops_project\data\production"
 OUTPUT_CSV = r"D:\manual_mlops_project\data\production\day2_data.csv"
 
+TRAIN_SIZE = 7000  # First 7000 for training
+TOTAL_EXPECTED = 10000
+
+# -----------------------------
 # Ensure output directory exists
+# -----------------------------
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
+# -----------------------------
+# Load Dataset
+# -----------------------------
 df = pd.read_csv(INPUT_CSV)
 
-# Simulate drift (example: modify numeric features)
-df_day2 = df.sample(frac=0.3, random_state=42).copy()
+if len(df) != TOTAL_EXPECTED:
+    print(f"Warning: Expected {TOTAL_EXPECTED} rows, found {len(df)}")
 
-numeric_cols = df_day2.select_dtypes(include=np.number).columns
-df_day2[numeric_cols] *= 1.05  # small drift
+# -----------------------------
+# Chronological Drift Simulation
+# -----------------------------
+# Last 3000 rows simulate production drift
+df_day2 = df.iloc[TRAIN_SIZE:].copy()
 
+# -----------------------------
+# Save Production Data
+# -----------------------------
 df_day2.to_csv(OUTPUT_CSV, index=False)
 
-print(" Day-2 drifted dataset saved at:", OUTPUT_CSV)
+print("Chronological drift simulation completed.")
+print(f"Training data: first {TRAIN_SIZE} rows")
+print(f"Production data: last {len(df_day2)} rows")
+print("Day-2 dataset saved at:", OUTPUT_CSV)

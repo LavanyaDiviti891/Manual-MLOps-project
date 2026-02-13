@@ -1,13 +1,23 @@
 import pandas as pd
 import joblib
 import json
-from pathlib import Path
 import requests
+import yaml
+from pathlib import Path
 
 # -----------------------------
-# Configuration
+# Load Config
 # -----------------------------
-DATA_PATH = r"D:\manual_mlops_project\data\production\day2_data.csv"
+CONFIG_PATH = "config.yaml"
+
+if not Path(CONFIG_PATH).exists():
+    raise FileNotFoundError("config.yaml not found.")
+
+with open(CONFIG_PATH, "r") as f:
+    config = yaml.safe_load(f)
+
+DATA_PATH = config["data"]["raw_path"]
+
 MODEL_DIR = Path("models")
 FEATURES_PATH = MODEL_DIR / "feature_names.pkl"
 
@@ -20,7 +30,8 @@ TARGET_COL = "Machine failure"
 
 
 df = pd.read_csv(DATA_PATH)
-df.columns = [col.strip() for col in df.columns]
+df = df.iloc[7000:]
+
 
 if TARGET_COL not in df.columns:
     raise ValueError(f"Target column '{TARGET_COL}' not found in dataset.")

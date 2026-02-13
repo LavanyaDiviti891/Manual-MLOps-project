@@ -47,3 +47,10 @@ Script: src/data_prep.py
 Input: data/raw/v1_raw.csv
 Description: Dropped missing values
 ------------------------------------------------------------
+
+Version: v5_cleaned.csv
+Created_on: 2026-02-13 10:55:50.627155
+Script: src/data_prep.py
+Input: data/raw/v1_raw.csv
+Description: Dropped missing values
+------------------------------------------------------------
