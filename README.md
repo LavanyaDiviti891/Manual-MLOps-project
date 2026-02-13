@@ -298,7 +298,7 @@ This ensures traceability of which model was active at a given time.
 
 
 
-python tests/run\_day2.py
+python tests/run\_day2\_inference.py
 
 
 
