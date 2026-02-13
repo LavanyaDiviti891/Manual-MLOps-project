@@ -214,7 +214,7 @@ Open a new Terminal:
 
 
 
-python tests/smoke\_test.py
+python src/smoke\_tests.py
 
 
 
