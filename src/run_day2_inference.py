@@ -5,9 +5,7 @@ import requests
 import yaml
 from pathlib import Path
 
-# -----------------------------
-# Load Config
-# -----------------------------
+
 CONFIG_PATH = "config.yaml"
 
 if not Path(CONFIG_PATH).exists():

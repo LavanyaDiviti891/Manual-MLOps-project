@@ -86,9 +86,7 @@ feature_names = list(X_train.columns)
 print("Training features prepared.")
 
 
-# -----------------------------
-# Train Model
-# -----------------------------
+
 model = RandomForestClassifier(
     n_estimators=N_ESTIMATORS,
     max_depth=MAX_DEPTH,
@@ -101,17 +99,12 @@ model.fit(X_train, y_train)
 print("Model training completed.")
 
 
-# -----------------------------
-# Save Artifacts
-# -----------------------------
 joblib.dump(model, MODEL_PATH)
 joblib.dump(encoder, MODEL_DIR / "encoder.pkl")
 joblib.dump(feature_names, MODEL_DIR / "feature_names.pkl")
 
 
-# -----------------------------
-# Save Metadata
-# -----------------------------
+
 try:
     git_hash = subprocess.check_output(
         ["git", "rev-parse", "HEAD"],

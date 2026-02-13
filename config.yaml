@@ -21,4 +21,4 @@ deployment:
   feature_names_path: "models/feature_names.pkl"
   metadata_path: "models/metadata.json"
   port: 8000
-  threshold: 0.5
+  threshold: 0.75

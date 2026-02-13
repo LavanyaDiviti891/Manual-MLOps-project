@@ -5,9 +5,6 @@ from pathlib import Path
 from datetime import datetime
 import csv
 
-# -----------------------------
-# Load Config
-# -----------------------------
 CONFIG_PATH = "config.yaml"
 
 if not Path(CONFIG_PATH).exists():
@@ -21,9 +18,6 @@ THRESHOLD = config["deployment"]["threshold"]
 LOG_PATH = Path("logs/production_predictions.jsonl")
 MONITOR_LOG = Path("logs/monitoring_log.csv")
 
-# -----------------------------
-# Validate Log File
-# -----------------------------
 if not LOG_PATH.exists():
     raise FileNotFoundError("Production log not found.")
 
@@ -49,9 +43,6 @@ with open(LOG_PATH, "r") as f:
             skipped += 1
 
 
-# -----------------------------
-# Monitoring Logic
-# -----------------------------
 if len(valid_preds) == 0:
     print("No valid predictions found.")
     print(f"Skipped entries: {skipped}")
@@ -66,9 +57,8 @@ else:
     print(f"Total evaluated samples: {len(valid_preds)}")
     print(f"Skipped entries: {skipped}")
 
-    # -----------------------------
-    # Log Monitoring Results
-    # -----------------------------
+  
+  
     MONITOR_LOG.parent.mkdir(exist_ok=True)
     file_exists = MONITOR_LOG.exists()
 
@@ -87,9 +77,7 @@ else:
             retrain_flag
         ])
 
-    # -----------------------------
-    # Retrain Trigger
-    # -----------------------------
+   
     if retrain_flag:
         print("\nPerformance below threshold. Retraining triggered...")
         subprocess.run(["python", "src/train.py"])
